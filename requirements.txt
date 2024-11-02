@@ -8,3 +8,4 @@ scipy
 imblearn
 scikit-learn
 seaborn
+xgboost
