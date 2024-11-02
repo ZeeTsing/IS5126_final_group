@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import pickle
+import streamlit as st
+import matplotlib.pyplot as plt
 
 CATEGORICAL_COLS = ['merchant','category','gender','city','state', 'job']
 NUMERIC_COLS = ['amt','age','distance_km']
@@ -47,4 +49,32 @@ def prediction_model(modelpath=MODELPATH):
 
     return model
 
+
+def calculate_fraud_rate(data, group_by_column):
+    return data.groupby(group_by_column).apply(lambda x: (x['is_fraud'].sum() / len(x)) * 100)
+
+def display_dataframe(title, data):
+    st.write(title)
+    st.dataframe(data)
+
+
+def plot_bar_chart(data, title, xlabel, ylabel, reference_line=None, rotation=45, color="skyblue"):
+    fig, ax = plt.subplots(figsize=(8, 6))
+    data.plot(kind='bar', ax=ax, color=color, alpha=0.7)
+    if reference_line:
+        ax.axhline(y=reference_line, color='red', linestyle='--', label=f'Reference Line: {reference_line:.2f}%')
+        ax.legend()
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    plt.xticks(rotation=rotation, fontsize=8)
+    st.pyplot(fig, use_container_width=True)
+
+
+
+@st.cache_data
+def load_data():
+    """Load and cache the machine learning model.
+    hard coded path to read file in data folder"""
+    return pd.read_csv("./data/credit_card_transactions.csv",index_col=0)
     

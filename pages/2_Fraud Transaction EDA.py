@@ -3,42 +3,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
+from util.helper_function import load_data, calculate_fraud_rate, display_dataframe, plot_bar_chart
 
 # 加载数据
-data = pd.read_csv('credit_card_transactions.csv')
-
-
-# 通用函数：计算欺诈率
-def calculate_fraud_rate(data, group_by_column):
-    return data.groupby(group_by_column).apply(lambda x: (x['is_fraud'].sum() / len(x)) * 100)
-
-
-# 通用函数：显示数据表格
-def display_dataframe(title, data):
-    st.write(title)
-    st.dataframe(data)
-
-
-# 通用函数：绘制直方图
-def plot_bar_chart(data, title, xlabel, ylabel, reference_line=None, rotation=45, color="skyblue"):
-    fig, ax = plt.subplots(figsize=(10, 6))
-    data.plot(kind='bar', ax=ax, color=color, alpha=0.7)
-    if reference_line:
-        ax.axhline(y=reference_line, color='red', linestyle='--', label=f'Reference Line: {reference_line:.2f}%')
-        ax.legend()
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
-    plt.xticks(rotation=rotation, fontsize=8)
-    st.pyplot(fig, use_container_width=True)
+data = load_data()
 
 
 # 计算整体欺诈率
 total_fraud_rate = (data['is_fraud'].sum() / len(data)) * 100
 
 # 左右布局
-st.title("信用卡交易欺诈分析")
-st.write("amt 和 is_fraud 散点图")
+st.title("Analysis on CC transactions")
 fig1, ax1 = plt.subplots()
 ax1.scatter(data['amt'], data['is_fraud'], alpha=0.5)
 ax1.set_xlabel("Transaction Amount (amt)")
@@ -135,6 +110,7 @@ plot_bar_chart(job_summary_table.set_index('job')['Fraud Rate (%)'], "Fraud Rate
 data['dob'] = pd.to_datetime(data['dob'], errors='coerce')
 data['age'] = datetime.now().year - data['dob'].dt.year
 data['age_group'] = pd.cut(data['age'], bins=list(range(0, 101, 5)))
+
 age_group_fraud_rate = calculate_fraud_rate(data, 'age_group')
 display_dataframe("Fraud Rate by Age Group", age_group_fraud_rate.reset_index().rename(columns={0: 'Fraud Rate (%)'}))
 plot_bar_chart(age_group_fraud_rate, "Fraud Rate by Age Group", "Age Group", "Fraud Rate (%)")

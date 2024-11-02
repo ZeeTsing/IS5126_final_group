@@ -5,8 +5,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.graph_objects as go
 from scipy import stats
+from util.helper_function import load_data
 
-data = pd.read_csv("./data/credit_card_transactions.csv",index_col=0)
+st.set_page_config(
+    page_title="Behavioral Analysis",
+    page_icon="🔍",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+
+data = load_data()
 # transform the date column to weekday
 data["day_of_week"] = pd.to_datetime(data['trans_date_trans_time']).dt.day_name()
 data["age"] = 2024 - data["dob"].apply(lambda x: int(x.split("-")[0]))
@@ -19,21 +28,15 @@ data["timeperiod"] = data["trans_hour"].apply(
               "evening" if 18 <= x < 22 else
               "midnight"
 )
-st.set_page_config(
-    page_title="Behavioral Analysis",
-    page_icon="🔍",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 st.write("# Behavioral Analysis")
 st.write("\n\n\n\n")
 st.header("Conclusion")
 
-st.write("1. 连续发生：Fraudulent transactions are more likely to occur consecutively.")
-st.write("2. 周末略多：Fraudulent transactions are slightly more likely to occur on weekends.")
-st.write("3. 一天中午夜最多：Fraudulent transactions are more likely to occur in the midnight.")
-st.write("4. 线上欺诈金额更高更频繁：Fraudulent transactions are more likely to occur in online activities.")
+st.write("1. Fraudulent transactions are more likely to occur consecutively.")
+st.write("2. Fraudulent transactions are slightly more likely to occur on weekends.")
+st.write("3. Fraudulent transactions are more likely to occur in the midnight.")
+st.write("4. Fraudulent transactions are more likely to occur in online activities.")
 st.write("\n\n\n")
 #########1. Consecutive Transactions#########
 
