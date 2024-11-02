@@ -14,3 +14,13 @@ Anomaly detection (clustering)
 - prevent loss / identify fraud early / identify patterns
 
 
+
+### Streamlit quick start
+
+The main entrance to our app is homePage.py
+
+Run the following in your command line:
+
+streamlit run homePage.py
+
+https://docs.streamlit.io/get-started
