@@ -14,8 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-
-data = load_data()
+#data = load_data()
 # transform the date column to weekday
 data["day_of_week"] = pd.to_datetime(data['trans_date_trans_time']).dt.day_name()
 data["age"] = 2024 - data["dob"].apply(lambda x: int(x.split("-")[0]))

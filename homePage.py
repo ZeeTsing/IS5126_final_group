@@ -12,6 +12,7 @@ st.set_page_config(
 st.header("Data-Driven Fraud Detection in Credit Card Payments")
 st.write("\n\n\n\n")
 
-data = load_data()
-
+with st.spinner('Loading dataset, please wait...'):
+    data = load_data()
+    st.info('Dataset loaded!')
 st.image("meme.png",  use_column_width=False)
