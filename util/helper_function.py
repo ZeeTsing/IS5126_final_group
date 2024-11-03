@@ -76,5 +76,5 @@ def plot_bar_chart(data, title, xlabel, ylabel, reference_line=None, rotation=45
 def load_data():
     """Load and cache the machine learning model.
     hard coded path to read file in data folder"""
-    return pd.read_csv("./data/credit_card_transactions.csv.gz",compression='gzip',index_col=0)
+    return pd.read_csv("./data/credit_card_transactions.csv.bz2",compression='bz2',index_col=0)
     
