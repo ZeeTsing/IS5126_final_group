@@ -14,7 +14,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-#data = load_data()
+data = load_data()
+
 # transform the date column to weekday
 data["day_of_week"] = pd.to_datetime(data['trans_date_trans_time']).dt.day_name()
 data["age"] = 2024 - data["dob"].apply(lambda x: int(x.split("-")[0]))
@@ -79,13 +80,14 @@ def plot_transcation_of_card(cc_num):
 
 col1, col2 = st.columns([1,2])
 with col1:
+    st.markdown("**Card Number and total fraud count**")
     st.dataframe(cc_cards)
 with col2:
     cc_num = st.selectbox("Select a credit card number", cc_cards["card_number"])
     st.plotly_chart(plot_transcation_of_card(cc_num))
 st.write("\n\n\n\n")
 
-
+st.write("The following table shows the detailed transactions of the selected credit card number.")
 st.dataframe(data[data["cc_num"] == cc_num])
 
 #########2. Day of Week#########
@@ -98,11 +100,14 @@ days_distri_bar.add_trace(go.Bar(
     y=days_distribution["is_fraud"],
     marker_color=colors
 ))
+days_distri_bar.add_hline(y=1216, line_dash="dot", line_color="blue", annotation_text="Sunday", annotation_position="bottom right")
 days_distri_bar.update_layout(
     title_text="Fraudulent Transactions by Day of Week",
     xaxis_title="Day of Week",
     yaxis_title="Number of Fraudulent Transactions",
-    yaxis=dict(range=[0, 2000])
+    yaxis=dict(range=[0, 2000]),
+    xaxis=dict(categoryorder='array', categoryarray=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+
 )
 st.plotly_chart(days_distri_bar, use_container_width=True)
 
@@ -134,7 +139,6 @@ st.plotly_chart(time_period_bar, use_container_width=True)
 
 #########4. Category#########
 
-col4_1,col4_2 = st.columns([1,2])
 cat_pie = go.Figure()   
 cat_pie.add_trace(go.Pie(
     labels=cat_data["category"],
@@ -198,8 +202,6 @@ cat_bar.update_layout(
     height=600
 )
 
-with col4_1:
-    st.plotly_chart(cat_pie, use_container_width=True)
 
-with col4_2:
-    st.plotly_chart(cat_bar, use_container_width=True)
+st.plotly_chart(cat_pie, use_container_width=True)
+st.plotly_chart(cat_bar, use_container_width=True)
