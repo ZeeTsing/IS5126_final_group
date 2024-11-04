@@ -6,6 +6,8 @@ import seaborn as sns
 import plotly.graph_objects as go
 from scipy import stats
 from util.helper_function import load_data
+import plotly.express as px
+import pydeck as pdk
 
 st.set_page_config(
     page_title="Behavioral Analysis",
@@ -88,7 +90,10 @@ with col2:
 st.write("\n\n\n\n")
 
 st.write("The following table shows the detailed transactions of the selected credit card number.")
-st.dataframe(data[data["cc_num"] == cc_num])
+fraud_data = data[(data["cc_num"] == cc_num) & (data["is_fraud"] == 1)]
+st.dataframe(fraud_data)
+
+
 
 #########2. Day of Week#########
 days_distribution = data.groupby("day_of_week")["is_fraud"].sum().reset_index()
