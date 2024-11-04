@@ -63,6 +63,6 @@ with col4:
     st.info('Some streets has common latitude & longitude.')
     st.write(df_street_latlong.lat_long.value_counts())
 '---'
-data['color']=data['is_fraud'].map(lambda x:(x,1.0-x,0.0))
-with st.spinner('Loading map visualisation, please wait..'):
-    st.map(data,latitude='lat',longitude='long',color='color')
+#data['color']=data['is_fraud'].map(lambda x:(x,1.0-x,0.0))
+#with st.spinner('Loading map visualisation, please wait..'):
+#    st.map(data,latitude='lat',longitude='long',color='color')

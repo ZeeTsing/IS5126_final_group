@@ -32,25 +32,24 @@ data["timeperiod"] = data["trans_hour"].apply(
 )
 
 st.write("# Behavioral Analysis")
-st.write("\n\n\n\n")
-st.header("Conclusion")
-
+st.header("Summary")
 st.write("1. Fraudulent transactions are more likely to occur consecutively.")
 st.write("2. Fraudulent transactions are slightly more likely to occur on weekends.")
 st.write("3. Fraudulent transactions are more likely to occur in the midnight.")
 st.write("4. Fraudulent transactions are more likely to occur in online activities.")
-st.write("\n\n\n")
-#########1. Consecutive Transactions#########
+st.write("---")
 
+#########1. Consecutive Transactions#########
+st.header("Fruadulant Transactions by Credit Card Number")
+st.info("1. Fraudulent transactions are more likely to occur consecutively.")
 cc_cards = data.groupby("cc_num")["is_fraud"].sum().sort_values(ascending=False).reset_index()
 cc_cards.columns = ["card_number","fraud_count"]
 
 
-def plot_transcation_of_card(cc_num):
+def plot_transaction_of_card(cc_num):
     a = data[data["cc_num"] == cc_num].reset_index()
     a.sort_values("trans_date_trans_time")
     fig = go.Figure()
-    
     # 添加折线图
     fig.add_trace(go.Scatter(
         x=a['trans_date_trans_time'],
@@ -58,7 +57,6 @@ def plot_transcation_of_card(cc_num):
         mode='lines',
         name='Amount'
     ))
-    
     # 添加欺诈交易的红色点
     fraud_transactions = a[a['is_fraud'] == True]
     fig.add_trace(go.Scatter(
@@ -68,7 +66,6 @@ def plot_transcation_of_card(cc_num):
         marker=dict(color='red'),
         name='Fraud'
     ))
-    
     # 添加标题和标签
     fig.update_layout(
         title='Transaction Amount Over Time',
@@ -76,26 +73,23 @@ def plot_transcation_of_card(cc_num):
         yaxis_title='Amount',
         legend_title='Legend'
     )
-    
     return fig
 
-
-col1, col2 = st.columns([1,2])
-with col1:
-    st.markdown("**Card Number and total fraud count**")
+col_A1, col_A2 = st.columns([1,2])
+with col_A1:
+    st.markdown("**Card Number and Total Fraud Count**")
     st.dataframe(cc_cards)
-with col2:
+with col_A2:
     cc_num = st.selectbox("Select a credit card number", cc_cards["card_number"])
-    st.plotly_chart(plot_transcation_of_card(cc_num))
-st.write("\n\n\n\n")
-
-st.write("The following table shows the detailed transactions of the selected credit card number.")
-fraud_data = data[(data["cc_num"] == cc_num) & (data["is_fraud"] == 1)]
-st.dataframe(fraud_data)
-
-
+    st.plotly_chart(plot_transaction_of_card(cc_num))
+    with st.expander("Show detailed transactions of the selected credit card number."):
+        fraud_data = data[(data["cc_num"] == cc_num) & (data["is_fraud"] == 1)]
+        st.dataframe(fraud_data)
+"---"
 
 #########2. Day of Week#########
+st.header("Fruadulant Transactions by Day of Week & Time of Day")
+col_B1, col_B2 = st.columns(2)
 days_distribution = data.groupby("day_of_week")["is_fraud"].sum().reset_index()
 days_distri_bar = go.Figure()
 colors = ['rgb(55, 83, 109)' if day not in ['Saturday', 'Sunday'] else 'red' for day in days_distribution["day_of_week"]]
@@ -114,9 +108,9 @@ days_distri_bar.update_layout(
     xaxis=dict(categoryorder='array', categoryarray=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
 
 )
-st.plotly_chart(days_distri_bar, use_container_width=True)
-
-
+with col_B1:
+    st.info("2. Fraudulent transactions are slightly more likely to occur on weekends.")
+    st.plotly_chart(days_distri_bar, use_container_width=True)
 
 # 获取欺诈交易的类别数据并计数
 fraud_data = data[data["is_fraud"] == 1]
@@ -124,7 +118,6 @@ cat_data = fraud_data.groupby("category")["amt"].agg(total_amount="sum", average
 cat_data = cat_data.sort_values(by="total_amount", ascending=False)
 
 #######3. Time Period#########
-
 time_period = data.groupby("timeperiod")["is_fraud"].sum().reset_index()
 time_period_bar = go.Figure()
 time_period_bar.add_trace(go.Bar(
@@ -140,10 +133,13 @@ time_period_bar.update_layout(
     xaxis=dict(categoryorder='array', categoryarray=["morning", "noon", "afternoon", "evening", "midnight"])
 
 )
-st.plotly_chart(time_period_bar, use_container_width=True)
+with col_B2:
+    st.info("3. Fraudulent transactions are more likely to occur in the midnight.")
+    st.plotly_chart(time_period_bar, use_container_width=True)
 
 #########4. Category#########
-
+st.header("Fraudulent Transactions by Transaction Category")
+st.info("4. Fraudulent transactions are more likely to occur in online activities.")
 cat_pie = go.Figure()   
 cat_pie.add_trace(go.Pie(
     labels=cat_data["category"],
@@ -151,14 +147,12 @@ cat_pie.add_trace(go.Pie(
     hole=0.3
 ))
 cat_pie.update_layout(
-    title_text="Fraudulent Transactions by Category"
+    title_text="Fraudulent Transactions by Category (Pie Chart)"
 )
 cat_pie.update_layout(
     width=800,
     height=600
 )
-
-
 
 cat_bar = go.Figure()
 # 添加总金额的条形图
@@ -180,7 +174,7 @@ cat_bar.add_trace(go.Scatter(
 
 # 更新布局
 cat_bar.update_layout(
-    title_text="Fraudulent Transactions by Category",
+    title_text="Fraudulent Transactions by Category (Bar Chart)",
     xaxis_title="Category",
     yaxis=dict(
         title="Total Amount",
@@ -207,6 +201,8 @@ cat_bar.update_layout(
     height=600
 )
 
-
-st.plotly_chart(cat_pie, use_container_width=True)
-st.plotly_chart(cat_bar, use_container_width=True)
+col_C1, col_C2 = st.columns([1,2])
+with col_C1:
+    st.plotly_chart(cat_pie, use_container_width=True)
+with col_C2:
+    st.plotly_chart(cat_bar, use_container_width=True)
