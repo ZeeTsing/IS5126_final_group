@@ -22,4 +22,7 @@ with col1:
 with st.spinner('Loading dataset, please wait...'):
     data = load_data()
     st.info('##### Dataset loaded! *Select a page on the sidebar to continue.*')
-st.image("meme.png",  use_column_width=False)
+    st.image("meme.png",  use_column_width=False)
+    "Preview of Dataset:"
+    f"Rows, Columns: {data.shape}"
+    st.write(data.head())
