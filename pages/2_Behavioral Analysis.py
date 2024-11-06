@@ -229,6 +229,40 @@ with tab1:
     st.plotly_chart(cat_pie, use_container_width=True)
     st.plotly_chart(cat_bar, use_container_width=True)
 
+
+    st.write("## Fraudulent Transactions by Amount")
+    # 创建重叠的直方图
+    amt_distribution = go.Figure()
+
+
+    # 添加欺诈交易的直方图
+    amt_distribution.add_trace(go.Histogram(
+        x=is_fraud["amt"],
+        histnorm='probability density',
+        name='Fraud',
+        marker_color='red',
+        opacity=0.5
+    ))
+
+    # 添加非欺诈交易的直方图
+    amt_distribution.add_trace(go.Histogram(
+        x=not_fraud["amt"],
+        histnorm='probability density',
+        name='Non-Fraud',
+        marker_color='green',
+        opacity=0.5
+    ))
+
+    # 更新布局
+    amt_distribution.update_layout(
+        title_text='Amount Distribution',
+        xaxis_title_text='Amount',
+        yaxis_title_text='Density',
+        barmode='overlay'
+    )
+    amt_distribution.update_xaxes(range=[0,1500])
+    st.plotly_chart(amt_distribution)
+
 with tab2:
     st.header("# Customer Segmentation")
     st.write("Our goal is to segment customers based on their spending behavior, age, trends, and geographic locations. This segmentation will enable customized marketing strategies and personalized offers to boost customer engagement. To achieve this, we will utilize a subset of data known as the 'df' dataset.")
@@ -270,5 +304,4 @@ with tab2:
 
     st.plotly_chart(age_distribution)
 
-    
     
