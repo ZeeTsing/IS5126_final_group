@@ -12,7 +12,7 @@ st.set_page_config(
 
 data = load_data()
 
-'### Identity and Geospatial Analysis'
+'### Identity and Spatial Analysis'
 data['name']=data['first']+' '+data['last']
 data['cc_num']=data['cc_num'].astype(str)
 data['trans_date_trans_time']=pd.to_datetime(data['trans_date_trans_time'])
