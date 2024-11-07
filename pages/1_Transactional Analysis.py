@@ -13,7 +13,7 @@ data = load_data()
 total_fraud_rate = (data['is_fraud'].sum() / len(data)) * 100
 
 # 左右布局
-st.title("Statistical Analysis")
+st.title("Transactional Analysis")
 st.header("Fraud Rate by Amount & Category")
 colA_1,colA_2=st.columns([1,2])
 fig1, ax1 = plt.subplots(figsize=(3, 6))
