@@ -263,6 +263,60 @@ with tab1:
     )
     amt_distribution.update_xaxes(range=[0,1500])
     st.plotly_chart(amt_distribution)
+    
+    st.write("")
+    cards = data['cc_num'].unique().tolist()
+    data["trans_date_trans_time"] = pd.to_datetime(data["trans_date_trans_time"])
+    results = pd.DataFrame(columns=['cc_num', 'is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff'])
+    
+    for card in cards:
+        card_data = data[data['cc_num'] == card]
+        card_data = card_data.sort_values(by='trans_date_trans_time')
+        card_data['time_diff_min'] = card_data["trans_date_trans_time"].diff().dt.total_seconds().fillna(0) / 60
+        result = pd.DataFrame({
+            'cc_num': [card],
+            'is_fraud_mean_time_diff': [card_data[card_data["is_fraud"] == 1]["time_diff_min"].mean()],
+            'is_not_fraud_mean_time_diff': [card_data[card_data["is_fraud"] == 0]["time_diff_min"].mean()]
+        })
+        results = pd.concat([results,result], ignore_index=True)
+
+
+
+    # 假设 results DataFrame 已经存在
+    # 计算 Q1 和 Q3
+    Q1 = results[['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']].quantile(0.25)
+    Q3 = results[['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # 过滤掉异常值
+    filtered_results = results[~((results[['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']] < (Q1 - 1.5 * IQR)) | (results[['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']] > (Q3 + 1.5 * IQR))).any(axis=1)]
+
+    # 计算平均值
+    mean_is_fraud_time_diff = filtered_results['is_fraud_mean_time_diff'].mean()
+    mean_is_not_fraud_time_diff = filtered_results['is_not_fraud_mean_time_diff'].mean()
+
+    # 创建一个新的 DataFrame 来存储平均值
+    mean_summary = pd.DataFrame({
+        'transaction_type': ['is_fraud', 'is_not_fraud'],
+        'mean_time_diff': [mean_is_fraud_time_diff, mean_is_not_fraud_time_diff]
+    })
+
+    # 绘制箱线图
+    fig_box = px.box(filtered_results.melt(id_vars='cc_num', value_vars=['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']),
+                     x='variable', y='value', title='Box Plot of Time Differences',
+                     color='variable', color_discrete_map={'is_fraud_mean_time_diff': 'red', 'is_not_fraud_mean_time_diff': 'blue'})
+    fig_box.update_layout(xaxis_title='Transaction Type', yaxis_title='Time Difference (minutes)')
+
+    # 显示箱线图
+    st.plotly_chart(fig_box)
+
+    # 绘制平均数直方图
+    fig_bar = px.bar(mean_summary, x='transaction_type', y='mean_time_diff', title='Mean Time Difference for Fraud and Non-Fraud Transactions',
+                     color='transaction_type', color_discrete_map={'is_fraud': 'red', 'is_not_fraud': 'blue'})
+    fig_bar.update_layout(xaxis_title='Transaction Type', yaxis_title='Mean Time Difference (minutes)')
+
+    # 显示直方图
+    st.plotly_chart(fig_bar)
 
 with tab2:
     st.header("## Customer Segmentation")
