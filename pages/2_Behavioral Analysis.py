@@ -18,6 +18,7 @@ st.set_page_config(
 
 ## data processing
 data = load_data()
+data['cc_num']=data['cc_num'].astype(str)
 
 # transform the date column to weekday
 data["day_of_week"] = pd.to_datetime(data['trans_date_trans_time']).dt.day_name()
@@ -45,7 +46,7 @@ tab1, tab2 = st.tabs(["Behavioral","Customer"])
 
 
 with tab1:
-    st.write("# Behavioral Analysis")
+    st.write("## Behavioral Analysis")
     st.write("\n\n\n\n")
     st.header("Conclusion")
 
@@ -53,7 +54,7 @@ with tab1:
 
     st.write("\n\n\n")
     #########1. Consecutive Transactions#########
-    st.write("## Consecutive Transactions")
+    st.write("### Consecutive Transactions")
     st.write("The table below displays the credit card numbers with the highest number of consecutive transactions. The line plot highlights the exact times when fraud occurs, marked with red dots. ")
     st.write("The chart highlights that fraudulent transactions often appear clustered within a short period This visual pattern is consistent with scenarios involving card theft or unauthorized use, where fraudsters rapidly perform a series of transactions to take advantage of the card before it is reported or blocked. The cluster of red markers indicates consecutive high-value transactions, suggesting that once a fraudster gains access, they act quickly to maximize their illicit use before detection systems or cardholder intervention halt further activity.")
     cc_cards = data.groupby("cc_num")["is_fraud"].sum().sort_values(ascending=False).reset_index()
@@ -110,7 +111,7 @@ with tab1:
 
 
     #########2. Day of Week#########
-    st.write("## Fraudulent Transactions by Day of Week")
+    st.write("### Fraudulent Transactions by Day of Week")
     st.write("The bar chart below shows the number of fraudulent transactions that occur on each day of the week. The chart highlights that fraudulent transactions are more likely to occur on weekends, with Sunday having the highest number of fraudulent transactions. This pattern may be due to reduced monitoring or oversight on weekends, making it easier for fraudsters to exploit vulnerabilities in the system.")
     days_distribution = data.groupby("day_of_week")["is_fraud"].sum().reset_index()
     days_distri_bar = go.Figure()
@@ -140,7 +141,7 @@ with tab1:
     cat_data = cat_data.sort_values(by="total_amount", ascending=False)
 
     #######3. Time Period#########
-    st.write("## Fraudulent Transactions by Time Period")
+    st.write("### Fraudulent Transactions by Time Period")
     st.write("The chart clearly illustrates that the highest number of fraudulent transactions occur during the midnight period, with a substantial spike compared to other time periods like morning, noon, afternoon, and evening. This pattern suggests that fraudsters prefer late-night hours for their activities, likely because it is a time when cardholders and financial institutions are less active. During these hours, individuals are often asleep, reducing the chance of immediate detection or transaction verification by cardholders.")
     time_period = data.groupby("timeperiod")["is_fraud"].sum().reset_index()
     time_period_bar = go.Figure()
@@ -160,7 +161,7 @@ with tab1:
     st.plotly_chart(time_period_bar, use_container_width=True)
 
     #########4. Category#########
-    st.write("## Fraudulent Transactions by Category")
+    st.write("### Fraudulent Transactions by Category")
 
     cat_pie = go.Figure()   
     cat_pie.add_trace(go.Pie(
@@ -230,7 +231,7 @@ with tab1:
     st.plotly_chart(cat_bar, use_container_width=True)
 
 
-    st.write("## Fraudulent Transactions by Amount")
+    st.write("### Fraudulent Transactions by Amount")
     # 创建重叠的直方图
     amt_distribution = go.Figure()
 
@@ -264,7 +265,7 @@ with tab1:
     st.plotly_chart(amt_distribution)
 
 with tab2:
-    st.header("# Customer Segmentation")
+    st.header("## Customer Segmentation")
     st.write("Our goal is to segment customers based on their spending behavior, age, trends, and geographic locations. This segmentation will enable customized marketing strategies and personalized offers to boost customer engagement. To achieve this, we will utilize a subset of data known as the 'df' dataset.")
     
 

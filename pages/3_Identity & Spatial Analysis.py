@@ -14,7 +14,6 @@ data = load_data()
 
 '### Identity and Spatial Analysis'
 data['name']=data['first']+' '+data['last']
-data['cc_num']=data['cc_num'].astype(str)
 data['trans_date_trans_time']=pd.to_datetime(data['trans_date_trans_time'])
 data['lat_long']=list(zip(data.lat,data.long))
 data['merch_lat_long']=list(zip(data.merch_lat,data.merch_long))
