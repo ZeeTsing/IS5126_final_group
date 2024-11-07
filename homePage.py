@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-"# Data-Driven Fraud Detection in Credit Card Payments"
+"## Data-Driven Insights for Detection and Prevention of Credit Card Fraud"
 "#### IS5126 Final Project - Group 7"
 col1,col2=st.columns(2)
 with col1:
