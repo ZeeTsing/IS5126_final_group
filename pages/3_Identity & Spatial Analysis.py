@@ -86,5 +86,6 @@ with tab4:
             st.write(trans_count)
         df_locs['color']=df_locs['is_fraud'].map(lambda x:(255*(x),255*(1-x),0))
         df_locs.loc[-1] = [geo[0], geo[1], 0, (0,0,255)]
+        df_locs = df_locs.reset_index()
         with st.spinner('Loading map visualisation, please wait..'):
             st.map(df_locs,latitude='merch_lat',longitude='merch_long',color='color')
