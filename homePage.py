@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-"# Data-Driven Fraud Detection in Credit Card Payments"
+"## Data-Driven Insights for Detection and Prevention of Credit Card Fraud"
 "#### IS5126 Final Project - Group 7"
 col1,col2=st.columns(2)
 with col1:
@@ -22,4 +22,7 @@ with col1:
 with st.spinner('Loading dataset, please wait...'):
     data = load_data()
     st.info('##### Dataset loaded! *Select a page on the sidebar to continue.*')
-st.image("meme.png",  use_column_width=False)
+    st.image("meme.png",  use_column_width=False)
+    "Preview of Dataset:"
+    f"Rows, Columns: {data.shape}"
+    st.write(data.head())

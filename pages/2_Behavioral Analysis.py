@@ -18,6 +18,7 @@ st.set_page_config(
 
 ## data processing
 data = load_data()
+data['cc_num']=data['cc_num'].astype(str)
 
 # transform the date column to weekday
 data["day_of_week"] = pd.to_datetime(data['trans_date_trans_time']).dt.day_name()
@@ -45,7 +46,7 @@ tab1, tab2 = st.tabs(["Behavioral","Customer"])
 
 
 with tab1:
-    st.write("# Behavioral Analysis")
+    st.write("## Behavioral Analysis")
     st.write("\n\n\n\n")
     st.header("Conclusion")
 
@@ -53,7 +54,7 @@ with tab1:
 
     st.write("\n\n\n")
     #########1. Consecutive Transactions#########
-    st.write("## Consecutive Transactions")
+    st.write("### Consecutive Transactions")
     st.write("The table below displays the credit card numbers with the highest number of consecutive transactions. The line plot highlights the exact times when fraud occurs, marked with red dots. ")
     st.write("The chart highlights that fraudulent transactions often appear clustered within a short period This visual pattern is consistent with scenarios involving card theft or unauthorized use, where fraudsters rapidly perform a series of transactions to take advantage of the card before it is reported or blocked. The cluster of red markers indicates consecutive high-value transactions, suggesting that once a fraudster gains access, they act quickly to maximize their illicit use before detection systems or cardholder intervention halt further activity.")
     cc_cards = data.groupby("cc_num")["is_fraud"].sum().sort_values(ascending=False).reset_index()
@@ -110,7 +111,7 @@ with tab1:
 
 
     #########2. Day of Week#########
-    st.write("## Fraudulent Transactions by Day of Week")
+    st.write("### Fraudulent Transactions by Day of Week")
     st.write("The bar chart below shows the number of fraudulent transactions that occur on each day of the week. The chart highlights that fraudulent transactions are more likely to occur on weekends, with Sunday having the highest number of fraudulent transactions. This pattern may be due to reduced monitoring or oversight on weekends, making it easier for fraudsters to exploit vulnerabilities in the system.")
     days_distribution = data.groupby("day_of_week")["is_fraud"].sum().reset_index()
     days_distri_bar = go.Figure()
@@ -140,7 +141,7 @@ with tab1:
     cat_data = cat_data.sort_values(by="total_amount", ascending=False)
 
     #######3. Time Period#########
-    st.write("## Fraudulent Transactions by Time Period")
+    st.write("### Fraudulent Transactions by Time Period")
     st.write("The chart clearly illustrates that the highest number of fraudulent transactions occur during the midnight period, with a substantial spike compared to other time periods like morning, noon, afternoon, and evening. This pattern suggests that fraudsters prefer late-night hours for their activities, likely because it is a time when cardholders and financial institutions are less active. During these hours, individuals are often asleep, reducing the chance of immediate detection or transaction verification by cardholders.")
     time_period = data.groupby("timeperiod")["is_fraud"].sum().reset_index()
     time_period_bar = go.Figure()
@@ -160,7 +161,7 @@ with tab1:
     st.plotly_chart(time_period_bar, use_container_width=True)
 
     #########4. Category#########
-    st.write("## Fraudulent Transactions by Category")
+    st.write("### Fraudulent Transactions by Category")
 
     cat_pie = go.Figure()   
     cat_pie.add_trace(go.Pie(
@@ -229,8 +230,96 @@ with tab1:
     st.plotly_chart(cat_pie, use_container_width=True)
     st.plotly_chart(cat_bar, use_container_width=True)
 
+
+    st.write("### Fraudulent Transactions by Amount")
+    # 创建重叠的直方图
+    amt_distribution = go.Figure()
+
+
+    # 添加欺诈交易的直方图
+    amt_distribution.add_trace(go.Histogram(
+        x=is_fraud["amt"],
+        histnorm='probability density',
+        name='Fraud',
+        marker_color='red',
+        opacity=0.5
+    ))
+
+    # 添加非欺诈交易的直方图
+    amt_distribution.add_trace(go.Histogram(
+        x=not_fraud["amt"],
+        histnorm='probability density',
+        name='Non-Fraud',
+        marker_color='green',
+        opacity=0.5
+    ))
+
+    # 更新布局
+    amt_distribution.update_layout(
+        title_text='Amount Distribution',
+        xaxis_title_text='Amount',
+        yaxis_title_text='Density',
+        barmode='overlay'
+    )
+    amt_distribution.update_xaxes(range=[0,1500])
+    st.plotly_chart(amt_distribution)
+    
+    st.write("")
+    cards = data['cc_num'].unique().tolist()
+    data["trans_date_trans_time"] = pd.to_datetime(data["trans_date_trans_time"])
+    results = pd.DataFrame(columns=['cc_num', 'is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff'])
+    
+    for card in cards:
+        card_data = data[data['cc_num'] == card]
+        card_data = card_data.sort_values(by='trans_date_trans_time')
+        card_data['time_diff_min'] = card_data["trans_date_trans_time"].diff().dt.total_seconds().fillna(0) / 60
+        result = pd.DataFrame({
+            'cc_num': [card],
+            'is_fraud_mean_time_diff': [card_data[card_data["is_fraud"] == 1]["time_diff_min"].mean()],
+            'is_not_fraud_mean_time_diff': [card_data[card_data["is_fraud"] == 0]["time_diff_min"].mean()]
+        })
+        results = pd.concat([results,result], ignore_index=True)
+
+
+
+    # 假设 results DataFrame 已经存在
+    # 计算 Q1 和 Q3
+    Q1 = results[['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']].quantile(0.25)
+    Q3 = results[['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # 过滤掉异常值
+    filtered_results = results[~((results[['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']] < (Q1 - 1.5 * IQR)) | (results[['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']] > (Q3 + 1.5 * IQR))).any(axis=1)]
+
+    # 计算平均值
+    mean_is_fraud_time_diff = filtered_results['is_fraud_mean_time_diff'].mean()
+    mean_is_not_fraud_time_diff = filtered_results['is_not_fraud_mean_time_diff'].mean()
+
+    # 创建一个新的 DataFrame 来存储平均值
+    mean_summary = pd.DataFrame({
+        'transaction_type': ['is_fraud', 'is_not_fraud'],
+        'mean_time_diff': [mean_is_fraud_time_diff, mean_is_not_fraud_time_diff]
+    })
+
+    # 绘制箱线图
+    fig_box = px.box(filtered_results.melt(id_vars='cc_num', value_vars=['is_fraud_mean_time_diff', 'is_not_fraud_mean_time_diff']),
+                     x='variable', y='value', title='Box Plot of Time Differences',
+                     color='variable', color_discrete_map={'is_fraud_mean_time_diff': 'red', 'is_not_fraud_mean_time_diff': 'blue'})
+    fig_box.update_layout(xaxis_title='Transaction Type', yaxis_title='Time Difference (minutes)')
+
+    # 显示箱线图
+    st.plotly_chart(fig_box)
+
+    # 绘制平均数直方图
+    fig_bar = px.bar(mean_summary, x='transaction_type', y='mean_time_diff', title='Mean Time Difference for Fraud and Non-Fraud Transactions',
+                     color='transaction_type', color_discrete_map={'is_fraud': 'red', 'is_not_fraud': 'blue'})
+    fig_bar.update_layout(xaxis_title='Transaction Type', yaxis_title='Mean Time Difference (minutes)')
+
+    # 显示直方图
+    st.plotly_chart(fig_bar)
+
 with tab2:
-    st.header("# Customer Segmentation")
+    st.header("## Customer Segmentation")
     st.write("Our goal is to segment customers based on their spending behavior, age, trends, and geographic locations. This segmentation will enable customized marketing strategies and personalized offers to boost customer engagement. To achieve this, we will utilize a subset of data known as the 'df' dataset.")
     
 
@@ -270,5 +359,4 @@ with tab2:
 
     st.plotly_chart(age_distribution)
 
-    
     

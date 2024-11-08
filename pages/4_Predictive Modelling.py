@@ -3,7 +3,7 @@ import pandas as pd
 from util.helper_function import pre_process, prediction_model
 
 # Set up the Streamlit app
-st.title("Fraud batch Prediction")
+st.title("Detection of Fraud Transactions using Predictive Modelling")
 st.write("Upload transaction records: ")
 
 uploaded_file = st.file_uploader(
